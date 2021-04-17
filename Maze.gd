@@ -7,7 +7,6 @@ var height = 15  # height of map (in tiles)
 var spacing = 2
 var erase_fraction = 0.2  # amount of wall removal
 
-
 const N = 1
 const E = 2
 const S = 4
@@ -20,24 +19,33 @@ var cell_walls = {
 	Vector2(0, -1): N
 }
 
-var map_seed = 0
-
-# get a reference to the map for convenience
 onready var Map = $TileMap
+onready var timer = $Timer
 
-# Called when the node enters the scene tree for the first time.
+func _input(event):
+	if event.is_action_pressed("ui_select"):
+		reset()
+		
 func _ready():
+	reset()
+	
+func reset(map_seed: int = 0):
 	randomize()
 	if !map_seed:
 		map_seed = randi()
 	seed(map_seed)
 	print("Seed: ", map_seed)
 	tile_size = Map.cell_size
-	make_maze()
-	erase_walls()
+	
+	var viewport_tile_size = get_viewport().size / tile_size
+	width = int(viewport_tile_size.x)
+	height = int(viewport_tile_size.y)
+	
+	yield(make_maze(), 'completed')
+	yield(erase_walls(), 'completed')
+	timer.start()
 
 func check_neighbors(cell, unvisited):
-	# returns an array of cell's unvisited neighbors
 	var list = []
 	for n in cell_walls.keys():
 		if cell + (n * spacing) in unvisited:
@@ -84,7 +92,7 @@ func make_maze():
 			unvisited.erase(current)
 		elif stack:
 			current = stack.pop_back()
-		#yield(get_tree(), 'idle_frame')
+		yield(get_tree(), 'idle_frame')
 
 func erase_walls():
 	# randomly remove a percentage of the map's walls
@@ -100,3 +108,8 @@ func erase_walls():
 		# if there's a wall between cell and neighbor, remove it
 		if Map.get_cellv(current) & cell_walls[dir]:
 			connect_cells(current, neighbor)
+		yield(get_tree(), 'idle_frame')
+
+
+func _on_timer_timeout():
+	reset()
