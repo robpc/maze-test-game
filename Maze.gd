@@ -21,10 +21,6 @@ var cell_walls = {
 
 onready var Map = $TileMap
 onready var timer = $Timer
-
-func _input(event):
-	if event.is_action_pressed("ui_select"):
-		reset()
 		
 func _ready():
 	reset()
