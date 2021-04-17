@@ -1,0 +1,61 @@
+name: Release
+
+env:
+  filename: maze-test
+  itchio_project: yammosk/maze-test
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  exports:
+    name: Export from Godot
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - preset: html
+            export_file: index.html
+          - preset: windows
+            export_file: maze-test.exe
+          # - preset: linux
+          #   export_file: the-purple-tower
+          # - preset: osx
+          #   export_file: the-purple-tower
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+      - name: Export ${{ matrix.preset }} from Godot
+        uses: robpc/godot-export-action@v3.2.3
+        with:
+          preset: ${{ matrix.preset }}
+          export_path: build/${{ matrix.preset }}/${{ matrix.export_file }}
+      - name: Set Version
+        env:
+          FILENAME: ${{ env.filename }}
+          PRESET: ${{ matrix.preset }}
+        run: |
+          version=${GITHUB_REF/refs\/tags\/v/}
+          echo "version=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+          echo "package=${FILENAME}-v${version}-${PRESET}.zip" >> $GITHUB_ENV
+      - uses: montudor/action-zip@v0.1.1
+        with:
+          args: zip --junk-paths --recurse-paths build/${{ env.package }} build/${{ matrix.preset }}
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/${{ env.package }}
+          tag: ${{ github.ref }}
+      # - name: Upload ${{ matrix.preset }} to itch.io project
+      #   uses: robpc/itchio-upload-action@v1
+      #   with:
+      #     path: build/${{ matrix.preset }}
+      #     project: ${{ env.itchio_project }}
+      #     channel: ${{ matrix.preset }}
+      #     version: ${{ env.version }}
+      #     api-key: ${{ secrets.ITCHIO_API_KEY }}
