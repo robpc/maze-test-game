@@ -20,10 +20,10 @@ jobs:
             export_file: index.html
           - preset: windows
             export_file: maze-test.exe
-          # - preset: linux
-          #   export_file: the-purple-tower
-          # - preset: osx
-          #   export_file: the-purple-tower
+          - preset: linux
+            export_file: maze-test
+          - preset: osx
+            export_file: maze-test
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
