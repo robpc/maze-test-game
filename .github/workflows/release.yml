@@ -49,7 +49,10 @@ jobs:
           args: zip --junk-paths --recurse-paths build/${{ env.package }} build/${{ matrix.preset }}
       - name: Copy ${{ matrix.preset }} bundle
         if: ${{ matrix.preset == 'osx' }}
-        run: cp build/${{ matrix.preset }}/${{ matrix.export_file }} build/${{ env.package }}
+        uses: canastro/copy-file-action@0.0.2
+        with:
+          source: build/${{ matrix.preset }}/${{ matrix.export_file }}
+          target: build/${{ env.package }}
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
