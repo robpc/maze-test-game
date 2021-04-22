@@ -1,8 +1,8 @@
 name: Release
 
 env:
+  godot_version: 3.3.1
   filename: maze-test
-  itchio_project: yammosk/maze-test
 
 on:
   push:
@@ -10,9 +10,16 @@ on:
       - v*
 
 jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ env.version }}
+    steps:
+      - run: echo "version=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
   exports:
     name: Export from Godot
-    runs-on: ubuntu-latest
+    needs:
+      - metadata
     strategy:
       matrix:
         include:
@@ -22,48 +29,96 @@ jobs:
             export_file: maze-test.exe
           - preset: linux
             export_file: maze-test
-          - preset: osx
-            export_file: maze-test-osx.zip
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
         with:
           lfs: true
+      - name: Set Env Vars
+        env:
+          FILENAME: ${{ env.filename }}
+          VERSION: ${{ needs.metadata.outputs.version }}
+          PRESET: ${{ matrix.preset }}
+        run: |
+          echo "package=${FILENAME}-v${VERSION}-${PRESET}.zip" >> $GITHUB_ENV
       - name: Export ${{ matrix.preset }} from Godot
         uses: robpc/godot-export-action@v3.3.1
         with:
           preset: ${{ matrix.preset }}
           export_path: build/${{ matrix.preset }}/${{ matrix.export_file }}
-      - name: Set Version
-        env:
-          FILENAME: ${{ env.filename }}
-          PRESET: ${{ matrix.preset }}
-        run: |
-          version=${GITHUB_REF/refs\/tags\/v/}
-          echo "version=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
-          echo "package=${FILENAME}-v${version}-${PRESET}.zip" >> $GITHUB_ENV
       - name: Bundle ${{ matrix.preset }} export
         uses: montudor/action-zip@v0.1.1
-        if: ${{ matrix.preset != 'osx' }}
         with:
           args: zip --junk-paths --recurse-paths build/${{ env.package }} build/${{ matrix.preset }}
-      - name: Copy ${{ matrix.preset }} bundle
-        if: ${{ matrix.preset == 'osx' }}
-        uses: canastro/copy-file-action@0.0.2
+      - name: Upload package
+        uses: actions/upload-artifact@v2
         with:
-          source: build/${{ matrix.preset }}/${{ matrix.export_file }}
-          target: build/${{ env.package }}
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
+          name: build
+          path: build/${{ env.package }}
+
+  exports-macos:
+    name: Export from Godot
+    needs:
+      - metadata
+    strategy:
+      matrix:
+        include:
+          - preset: osx
+            export_file: maze-test.zip
+    runs-on: macos-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/${{ env.package }}
-          tag: ${{ github.ref }}
-      # - name: Upload ${{ matrix.preset }} to itch.io project
-      #   uses: robpc/itchio-upload-action@v1
-      #   with:
-      #     path: build/${{ matrix.preset }}
-      #     project: ${{ env.itchio_project }}
-      #     channel: ${{ matrix.preset }}
-      #     version: ${{ env.version }}
-      #     api-key: ${{ secrets.ITCHIO_API_KEY }}
+          lfs: true
+      - name: Set Env Vars
+        env:
+          FILENAME: ${{ env.filename }}
+          VERSION: ${{ needs.metadata.outputs.version }}
+          PRESET: ${{ matrix.preset }}
+        run: |
+          echo "package=${FILENAME}-v${VERSION}-${PRESET}.zip" >> $GITHUB_ENV
+      - name: Export osx
+        env:
+          GODOT_VERSION: ${{ env.godot_version }}
+          PRESET: ${{ matrix.preset }}
+          BUILD_DIR: build
+          FILENAME: ${{ env.package }}
+        run: |
+          wget -q https://downloads.tuxfamily.org/godotengine/${GODOT_VERSION}/Godot_v${GODOT_VERSION}-stable_osx.universal.zip
+          unzip Godot_v${GODOT_VERSION}-stable_osx.universal.zip
+
+          export XDG_DATA_HOME="$(pwd)/xdg_data_home"
+          export TEMPLATES_DIR="${XDG_DATA_HOME}/godot/templates/${GODOT_VERSION}.stable/"
+          mkdir -p ${TEMPLATES_DIR}
+          wget -q https://downloads.tuxfamily.org/godotengine/${GODOT_VERSION}/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          unzip Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          mv templates/* ${TEMPLATES_DIR}
+
+          mkdir -p ${BUILD_DIR}
+          Godot.app/Contents/MacOS/Godot --export ${PRESET} ${BUILD_DIR}/${FILENAME}
+      - name: Upload package
+        uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: build/${{ env.package }}
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - metadata
+      - exports
+      - exports-macos
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: build
+      - run: ls -la
+      - uses: ncipollo/release-action@v1
+        with:
+          name: Release v${{ needs.metadata.outputs.version }}
+          tag: ${{ needs.metadata.outputs.version }}
+          draft: true # for testing
+          allowUpdates: true
+          artifacts: "*.zip"
+          token: ${{ secrets.GITHUB_TOKEN }}
