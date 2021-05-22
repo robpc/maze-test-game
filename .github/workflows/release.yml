@@ -2,7 +2,7 @@ name: Release
 
 env:
   godot_version: 3.3.1
-  filename: maze-test
+  app_name: maze-test
 
 on:
   push:
@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ env.version }}
+      export_name: ${{ env.app_name }}
     steps:
       - run: echo "version=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
   exports:
@@ -26,9 +27,9 @@ jobs:
           - preset: html
             export_file: index.html
           - preset: windows
-            export_file: maze-test.exe
+            export_file: ${{ needs.metadata.outputs.export_name }}.exe
           - preset: linux
-            export_file: maze-test
+            export_file: ${{ needs.metadata.outputs.export_name }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -37,11 +38,11 @@ jobs:
           lfs: true
       - name: Set Env Vars
         env:
-          FILENAME: ${{ env.filename }}
+          APP_NAME: ${{ env.app_name }}
           VERSION: ${{ needs.metadata.outputs.version }}
           PRESET: ${{ matrix.preset }}
         run: |
-          echo "package=${FILENAME}-v${VERSION}-${PRESET}.zip" >> $GITHUB_ENV
+          echo "package=${APP_NAME}-v${VERSION}-${PRESET}.zip" >> $GITHUB_ENV
       - name: Export ${{ matrix.preset }} from Godot
         uses: robpc/godot-export-action@v3.3.1
         with:
@@ -65,7 +66,7 @@ jobs:
       matrix:
         include:
           - preset: osx
-            export_file: maze-test.zip
+            export_file: ${{ needs.metadata.outputs.filename }}.zip
     runs-on: macos-latest
     steps:
       - name: Check out repository
@@ -74,11 +75,11 @@ jobs:
           lfs: true
       - name: Set Env Vars
         env:
-          FILENAME: ${{ env.filename }}
+          APP_NAME: ${{ env.app_name }}
           VERSION: ${{ needs.metadata.outputs.version }}
           PRESET: ${{ matrix.preset }}
         run: |
-          echo "package=${FILENAME}-v${VERSION}-${PRESET}.zip" >> $GITHUB_ENV
+          echo "package=${APP_NAME}-v${VERSION}-${PRESET}.zip" >> $GITHUB_ENV
       - name: Export osx
         env:
           GODOT_VERSION: ${{ env.godot_version }}
