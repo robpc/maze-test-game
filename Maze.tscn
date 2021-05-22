@@ -1,7 +1,21 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Maze.gd" type="Script" id=1]
 [ext_resource path="res://resources/road_tiles.tres" type="TileSet" id=2]
+[ext_resource path="res://ui/LabelValue.tscn" type="PackedScene" id=3]
+
+[sub_resource type="StyleBoxFlat" id=1]
+content_margin_left = 16.0
+content_margin_right = 16.0
+content_margin_top = 16.0
+content_margin_bottom = 16.0
+bg_color = Color( 0.2, 0.2, 0.2, 0.878431 )
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_color = Color( 0.227451, 0.227451, 0.227451, 0.207843 )
+shadow_size = 6
 
 [node name="Maze" type="Node2D"]
 script = ExtResource( 1 )
@@ -13,5 +27,53 @@ format = 1
 [node name="Timer" type="Timer" parent="."]
 wait_time = 5.0
 one_shot = true
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Margin" type="MarginContainer" parent="CanvasLayer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 4
+custom_constants/margin_top = 4
+custom_constants/margin_left = 4
+custom_constants/margin_bottom = 4
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BottomPanel" type="PanelContainer" parent="CanvasLayer/Margin"]
+margin_left = 1330.0
+margin_top = 858.0
+margin_right = 1596.0
+margin_bottom = 956.0
+size_flags_horizontal = 8
+size_flags_vertical = 8
+custom_styles/panel = SubResource( 1 )
+
+[node name="List" type="VBoxContainer" parent="CanvasLayer/Margin/BottomPanel"]
+margin_left = 16.0
+margin_top = 16.0
+margin_right = 250.0
+margin_bottom = 82.0
+custom_constants/separation = 12
+
+[node name="Project" parent="CanvasLayer/Margin/BottomPanel/List" instance=ExtResource( 3 )]
+margin_right = 234.0
+_label = "maze-test"
+_value = "v0.0-unk"
+
+[node name="Kenney" parent="CanvasLayer/Margin/BottomPanel/List" instance=ExtResource( 3 )]
+margin_top = 26.0
+margin_right = 234.0
+margin_bottom = 40.0
+_label = "Art by"
+_value = "http://kenney.nl"
+
+[node name="KidsCanCode" parent="CanvasLayer/Margin/BottomPanel/List" instance=ExtResource( 3 )]
+margin_top = 52.0
+margin_right = 234.0
+margin_bottom = 66.0
+_label = "Based on"
+_value = "http://kidscancode.org"
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

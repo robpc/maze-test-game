@@ -10,7 +10,6 @@ config_version=4
 
 _global_script_classes=[  ]
 _global_script_class_icons={
-
 }
 
 [application]
@@ -18,6 +17,7 @@ _global_script_class_icons={
 config/name="maze-test"
 run/main_scene="res://Maze.tscn"
 config/icon="res://icon.png"
+config/version="1.0-debug"
 
 [display]
 

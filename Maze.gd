@@ -23,6 +23,9 @@ onready var Map = $TileMap
 onready var timer = $Timer
 		
 func _ready():
+	var version = ProjectSettings.get_setting('application/config/version')
+	print('version ', version)
+	$CanvasLayer/Margin/BottomPanel/List/Project.set_value(version)
 	reset()
 	
 func reset(map_seed: int = 0):

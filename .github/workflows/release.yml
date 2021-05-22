@@ -39,7 +39,14 @@ jobs:
         uses: actions/checkout@v2
         with:
           lfs: true
+
       - name: Set Settings Override
+        env:
+          VERSION: ${{ needs.metadata.outputs.version }}
+        run: |-
+          echo -e "[application]\nconfig/version=\"${VERSION}\"" > overrides.cfg
+          cat overrides.cfg
+      - name: Set Exports Override
         env:
           VALUE: ${{ needs.metadata.outputs.version }}
           EXPORT_NAMES: |-
