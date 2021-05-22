@@ -66,7 +66,6 @@ jobs:
       matrix:
         include:
           - preset: osx
-            export_file: ${{ needs.metadata.outputs.filename }}.zip
     runs-on: macos-latest
     steps:
       - name: Check out repository
