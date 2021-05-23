@@ -39,27 +39,10 @@ jobs:
         uses: actions/checkout@v2
         with:
           lfs: true
-
-      - name: Set Settings Override
-        env:
-          VERSION: ${{ needs.metadata.outputs.version }}
-        run: |-
-          echo -e "[application]\nconfig/version=\"${VERSION}\"" > overrides.cfg
-          cat overrides.cfg
-      - name: Set Exports Override
-        env:
-          VALUE: ${{ needs.metadata.outputs.version }}
-          EXPORT_NAMES: |-
-            application/version
-            application/short_version
-            application/file_version
-            application/product_version
-        run: |-
-          echo "${EXPORT_NAMES}" | while read name
-          do
-            sed -i 's|'"${name}"'=.*|'"${name}"'="'"${VALUE}"'"|g' export_presets.cfg
-          done
-          grep version export_presets.cfg
+      - name: Set Project Version
+        uses: ./.github/actions/godot-project-version
+        with:
+          version: ${{ needs.metadata.outputs.version }}
       - name: Set Env Vars
         env:
           APP_NAME: ${{ env.app_name }}
@@ -96,6 +79,10 @@ jobs:
         uses: actions/checkout@v2
         with:
           lfs: true
+      - name: Set Project Version
+        uses: ./.github/actions/godot-project-version
+        with:
+          version: ${{ needs.metadata.outputs.version }}
       - name: Set Env Vars
         env:
           APP_NAME: ${{ env.app_name }}

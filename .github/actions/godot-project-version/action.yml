@@ -1,0 +1,37 @@
+name: 'godot-project-version'
+description: 'Set project version in project settings and export presets'
+inputs:
+  version:  # id of input
+    description: 'Version to set in the Godot project'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Set Settings Override
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: |-
+        echo -e "[application]\nconfig/version=\"${VERSION}\"" > override.cfg
+
+        echo "-- override.cfg --"
+        cat override.cfg
+        echo
+    - name: Set Exports Override
+      shell: bash
+      env:
+        VALUE: ${{ inputs.version }}
+        EXPORT_NAMES: |-
+          application/version
+          application/short_version
+          application/file_version
+          application/product_version
+      run: |-
+        echo "${EXPORT_NAMES}" | while read n
+        do
+          name=${n/\//\\\/}
+          sed -i.bak 's|'"${name}"'=.*|'"${name}"'="'"${VALUE}"'"|g' export_presets.cfg
+        done
+
+        echo "-- export_presets.cfg --"
+        grep version export_presets.cfg
