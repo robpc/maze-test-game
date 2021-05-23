@@ -17,7 +17,17 @@ _global_script_class_icons={
 config/name="maze-test"
 run/main_scene="res://Maze.tscn"
 config/icon="res://icon.png"
-config/version="1.0-debug"
+
+[build-info]
+
+package/version=""
+package/build-date=""
+package/build_date=""
+
+[build_info]
+
+package/build_date="2021-05-23 21:25:26"
+source/commit=""
 
 [display]
 
