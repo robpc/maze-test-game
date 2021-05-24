@@ -20,7 +20,7 @@ jobs:
       - name: Add Build Info
         uses: robpc/godot-build-info-action@v1
       - name: Export html from Godot
-        uses: robpc/godot-export-action@v3.3
+        uses: robpc/godot-export-action@v3.3.2
         with:
           preset: html
           export_path: build/html/index.html

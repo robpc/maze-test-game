@@ -1,7 +1,7 @@
 name: Release
 
 env:
-  godot_version: 3.3.1
+  godot_version: 3.3.2
   app_name: maze-test
 
 on:
@@ -49,7 +49,7 @@ jobs:
         run: |
           echo "package=${APP_NAME}-v${VERSION}-${PRESET}.zip" >> $GITHUB_ENV
       - name: Export ${{ matrix.preset }} from Godot
-        uses: robpc/godot-export-action@v3.3.1
+        uses: robpc/godot-export-action@v3.3.2
         with:
           preset: ${{ matrix.preset }}
           export_path: build/${{ matrix.preset }}/${{ matrix.export_file }}
