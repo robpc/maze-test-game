@@ -16,8 +16,7 @@ jobs:
       version: ${{ env.version }}
       export_name: ${{ env.app_name }}
     steps:
-      #- run: echo "version=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
-      - run: echo "version=0.0-settings-test" >> $GITHUB_ENV
+      - run: echo "version=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
   exports:
     name: Export from Godot
     needs:
