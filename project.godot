@@ -33,6 +33,7 @@ source/commit=""
 
 window/size/width=1600
 window/size/height=960
+window/dpi/allow_hidpi=true
 
 [rendering]
 
