@@ -17,7 +17,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           lfs: true
-      - run: echo "version=$(npx @robpc/git-semver@0.1.6 ${REPO} ${REF}) >> $GITHUB_ENV
+      - name: Set git-semver version
+        run: echo "version=$(npx @robpc/git-semver@0.1.6 ${REPO} ${REF})" >> $GITHUB_ENV
         env:
           REPO: ${{ github.repository }}
           REF: ${{ github.sha }}
