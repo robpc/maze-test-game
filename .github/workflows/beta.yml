@@ -17,8 +17,14 @@ jobs:
         uses: actions/checkout@v2
         with:
           lfs: true
+      - run: echo "version=$(npx @robpc/git-semver@0.1.6 ${REPO} ${REF}) >> $GITHUB_ENV
+        env:
+          REPO: ${{ github.repository }}
+          REF: ${{ github.sha }}
       - name: Add Build Info
         uses: robpc/godot-build-info-action@v1
+        with:
+          version: ${{ env.version }}
       - name: Export html from Godot
         uses: robpc/godot-export-action@v3.4
         with:
