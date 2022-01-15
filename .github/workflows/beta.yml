@@ -20,6 +20,7 @@ jobs:
       - name: Set git-semver version
         run: echo "version=$(npx @robpc/git-semver@0.1.6 ${REPO} ${REF})" >> $GITHUB_ENV
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           REF: ${{ github.sha }}
       - name: Add Build Info
