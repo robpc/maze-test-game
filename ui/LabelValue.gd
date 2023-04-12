@@ -1,15 +1,15 @@
-tool
+@tool
 extends HBoxContainer
 
-onready var name_label = $Label
-onready var value_label = $Value
+@onready var name_label = $Label
+@onready var value_label = $Value
 
-export var _label: String = 'Name'
-export var _value: String = 'Value' 
+@export var _label: String = 'Name'
+@export var _value: String = 'Value' 
 
 func _enter_tree():
 	if OS.has_feature('editor'):
-		var error = connect("visibility_changed", self, "_on_visibility_changed")
+		var error = connect("visibility_changed",Callable(self,"_on_visibility_changed"))
 		if error:
 			print_debug(error)
 

@@ -19,13 +19,14 @@ var cell_walls = {
 	Vector2(0, -1): N
 }
 
-onready var Map = $TileMap
-onready var timer = $Timer
+@onready var Map = $TileMap
+@onready var timer = $Timer
+@onready var project = $CanvasLayer/Margin/BottomPanel/MarginContainer/List/Project
 		
 func _ready():
 	var version = ProjectSettings.get_setting('build_info/package/version')
 	var build_date = ProjectSettings.get_setting('build_info/package/build_date')
-	$CanvasLayer/Margin/BottomPanel/List/Project.set_value(version if version else build_date)
+	project.set_value(version if version else build_date)
 	reset()
 	
 func reset(map_seed: int = 0):
@@ -34,14 +35,14 @@ func reset(map_seed: int = 0):
 		map_seed = randi()
 	seed(map_seed)
 	print("Seed: ", map_seed)
-	tile_size = Map.cell_size
+	tile_size = Map.tile_set.tile_size
 	
 	var viewport_tile_size = get_viewport().size / tile_size
 	width = int(viewport_tile_size.x)
 	height = int(viewport_tile_size.y)
 	
-	yield(make_maze(), 'completed')
-	yield(erase_walls(), 'completed')
+	await make_maze()
+	await erase_walls()
 	timer.start()
 
 func check_neighbors(cell, unvisited):
@@ -54,16 +55,16 @@ func check_neighbors(cell, unvisited):
 func connect_cells(current: Vector2, next: Vector2) -> void:
 	# remove walls from *both* cells
 	var dir := (next - current).normalized()
-	var current_walls = Map.get_cellv(current) - cell_walls[dir]
-	var next_walls = Map.get_cellv(next) - cell_walls[-dir]
-	Map.set_cellv(current, current_walls)
-	Map.set_cellv(next, next_walls)
+	var current_walls = Map.get_cell_source_id(0, current) - cell_walls[dir]
+	var next_walls = Map.get_cell_source_id(0,next) - cell_walls[-dir]
+	Map.set_cell(0, current, current_walls, Vector2i.ZERO)
+	Map.set_cell(0, next, next_walls, Vector2i.ZERO)
 	for n in range(1, spacing):
 		var cell = current + (dir * n)
 		if dir.x != 0:
-			Map.set_cellv(cell, 5)  # vertical road
+			Map.set_cell(0, cell, 5, Vector2i.ZERO)  # vertical road
 		else:
-			Map.set_cellv(cell, 10)  # horizontal road
+			Map.set_cell(0, cell, 10, Vector2i.ZERO)  # horizontal road
 
 func make_maze():
 	var unvisited = []  # array of unvisited tiles
@@ -72,7 +73,7 @@ func make_maze():
 	Map.clear()
 	for x in range(width):
 		for y in range(height):
-			Map.set_cellv(Vector2(x, y), N|E|S|W)
+			Map.set_cell(0, Vector2(x, y), N|E|S|W, Vector2i.ZERO)
 	for x in range(0, width, spacing):
 		for y in range(0, height, spacing):
 			unvisited.append(Vector2(x, y))
@@ -91,7 +92,7 @@ func make_maze():
 			unvisited.erase(current)
 		elif stack:
 			current = stack.pop_back()
-		yield(get_tree(), 'idle_frame')
+		await get_tree().process_frame
 
 func erase_walls():
 	# randomly remove a percentage of the map's walls
@@ -105,9 +106,9 @@ func erase_walls():
 		var dir = cell_walls.keys()[randi() % cell_walls.size()]
 		var neighbor = current + (dir * spacing)
 		# if there's a wall between cell and neighbor, remove it
-		if Map.get_cellv(current) & cell_walls[dir]:
+		if Map.get_cell_source_id(0, current) & cell_walls[dir]:
 			connect_cells(current, neighbor)
-		yield(get_tree(), 'idle_frame')
+		await get_tree().process_frame
 
 
 func _on_timer_timeout():

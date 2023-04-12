@@ -28,9 +28,9 @@ jobs:
         with:
           version: ${{ env.version }}
       - name: Export html from Godot
-        uses: robpc/godot-export-action@v3.4
+        uses: robpc/godot-export-action@v4.0
         with:
-          preset: html
+          preset: web
           export_path: build/html/index.html
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.1
