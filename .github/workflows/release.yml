@@ -18,11 +18,11 @@ jobs:
           - preset: web
             export_file: index.html
           - preset: windows
-            export_file: ${{ env.app_name }}.exe
+            export_file: maze-test.exe
           - preset: linux
-            export_file: ${{ env.app_name }}
+            export_file: maze-test
           - preset: macos
-            export_file: ${{ env.app_name }}.zip
+            export_file: maze-test.zip
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
