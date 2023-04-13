@@ -18,11 +18,11 @@ jobs:
           - preset: web
             export_file: index.html
           - preset: windows
-            export_file: ${{ needs.metadata.outputs.export_name }}.exe
+            export_file: ${{ env.app_name }}.exe
           - preset: linux
-            export_file: ${{ needs.metadata.outputs.export_name }}
+            export_file: ${{ env.app_name }}
           - preset: macos
-            export_file: ${{ needs.metadata.outputs.export_name }}.zip
+            export_file: ${{ env.app_name }}.zip
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
