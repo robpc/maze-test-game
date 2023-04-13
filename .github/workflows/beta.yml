@@ -28,7 +28,7 @@ jobs:
         with:
           version: ${{ env.version }}
       - name: Export html from Godot
-        uses: robpc/godot-export-action@v4.0
+        uses: robpc/godot-export-action@v4.0.2
         with:
           preset: web
           export_path: build/html/index.html
