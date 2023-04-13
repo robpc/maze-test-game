@@ -1,7 +1,7 @@
 name: Release
 
 env:
-  godot_version: 3.4.2
+  godot_version: '4.0'
   app_name: maze-test
 
 on:
@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - preset: html
+          - preset: web
             export_file: index.html
           - preset: windows
             export_file: ${{ needs.metadata.outputs.export_name }}.exe
@@ -48,7 +48,7 @@ jobs:
         run: |
           echo "package=${APP_NAME}-v${VERSION}-${PRESET}.zip" >> $GITHUB_ENV
       - name: Export ${{ matrix.preset }} from Godot
-        uses: robpc/godot-export-action@v3.4.2
+        uses: robpc/godot-export-action@v4.0
         with:
           preset: ${{ matrix.preset }}
           export_path: build/${{ matrix.preset }}/${{ matrix.export_file }}
@@ -69,7 +69,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - preset: osx
+          - preset: macos
     runs-on: macos-latest
     steps:
       - name: Check out repository
@@ -87,25 +87,11 @@ jobs:
           PRESET: ${{ matrix.preset }}
         run: |
           echo "package=${APP_NAME}-v${VERSION}-${PRESET}.zip" >> $GITHUB_ENV
-      - name: Export osx
-        env:
-          GODOT_VERSION: ${{ env.godot_version }}
-          PRESET: ${{ matrix.preset }}
-          BUILD_DIR: build
-          FILENAME: ${{ env.package }}
-        run: |
-          wget -q https://downloads.tuxfamily.org/godotengine/${GODOT_VERSION}/Godot_v${GODOT_VERSION}-stable_osx.universal.zip
-          unzip Godot_v${GODOT_VERSION}-stable_osx.universal.zip
-
-          export XDG_DATA_HOME="$(pwd)/xdg_data_home"
-          export TEMPLATES_DIR="${XDG_DATA_HOME}/godot/templates/${GODOT_VERSION}.stable/"
-          mkdir -p ${TEMPLATES_DIR}
-          wget -q https://downloads.tuxfamily.org/godotengine/${GODOT_VERSION}/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
-          unzip Godot_v${GODOT_VERSION}-stable_export_templates.tpz
-          mv templates/* ${TEMPLATES_DIR}
-
-          mkdir -p ${BUILD_DIR}
-          Godot.app/Contents/MacOS/Godot --export ${PRESET} ${BUILD_DIR}/${FILENAME}
+      - name: Export ${{ matrix.preset }} from Godot
+        uses: robpc/godot-export-action@v4.0
+        with:
+          preset: ${{ matrix.preset }}
+          export_path: build/${{ env.package }}
       - name: Upload package
         uses: actions/upload-artifact@v2
         with:
