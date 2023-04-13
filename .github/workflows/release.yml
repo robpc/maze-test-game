@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           lfs: true
       - name: Add Build Info
@@ -57,7 +57,7 @@ jobs:
         with:
           args: zip --junk-paths --recurse-paths build/${{ env.package }} build/${{ matrix.preset }}
       - name: Upload package
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: build
           path: build/${{ env.package }}
@@ -70,10 +70,10 @@ jobs:
       matrix:
         include:
           - preset: macos
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           lfs: true
       - name: Add Build Info
@@ -93,7 +93,7 @@ jobs:
           preset: ${{ matrix.preset }}
           export_path: build/${{ env.package }}
       - name: Upload package
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: build
           path: build/${{ env.package }}
