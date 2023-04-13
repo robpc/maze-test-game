@@ -68,6 +68,9 @@ jobs:
     needs:
       - exports
     steps:
+      - name: Set Env Vars
+        run: |
+          echo "version=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
       - uses: actions/download-artifact@v3
         with:
           name: build
